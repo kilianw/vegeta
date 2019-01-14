@@ -1,6 +1,9 @@
 package vegeta
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/graphql-go/graphql"
 	"strconv"
 	"time"
 
@@ -28,6 +31,10 @@ type Metrics struct {
 	Wait time.Duration `json:"wait"`
 	// Requests is the total number of requests executed.
 	Requests uint64 `json:"requests"`
+	// HasData is the total number of requests executed with a GQL data field.
+	HasData uint64 `json:"has_data"`
+	// HasErrors is the total number of requests executed with a GQL errors field.
+	HasErrors uint64 `json:"has_errors"`
 	// Rate is the rate of requests per second.
 	Rate float64 `json:"rate"`
 	// Success is the percentage of non-error responses.
@@ -74,6 +81,33 @@ func (m *Metrics) Add(r *Result) {
 			m.errors[r.Error] = struct{}{}
 			m.Errors = append(m.Errors, r.Error)
 		}
+	}
+
+	// Add GraphQL metrics
+	if r.Body != nil {
+		var gqlResult graphql.Result
+		err := json.Unmarshal(r.Body, &gqlResult)
+		if err == nil {
+			if gqlResult.Data != nil {
+				m.HasData++
+			}
+			if gqlResult.Errors != nil {
+				fmt.Println(gqlResult.Errors)
+				m.HasErrors++
+				for _, err := range gqlResult.Errors {
+					if err.Message != "" {
+						m.errors[err.Message] = struct{}{}
+						m.Errors = append(m.Errors, err.Message)
+					}
+				}
+			}
+		} else {
+			m.errors["Unable to decode GQL"] = struct{}{}
+			m.Errors = append(m.Errors, "Unable to decode GQL")
+		}
+	} else {
+		m.errors["No Body Found"] = struct{}{}
+		m.Errors = append(m.Errors, "No Body Found")
 	}
 }
 

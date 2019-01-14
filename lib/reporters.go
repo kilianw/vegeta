@@ -60,6 +60,8 @@ func NewTextReporter(m *Metrics) Reporter {
 		"Bytes In\t[total, mean]\t%d, %.2f\n" +
 		"Bytes Out\t[total, mean]\t%d, %.2f\n" +
 		"Success\t[ratio]\t%.2f%%\n" +
+		"Data Field\t[total]\t%d\n" +
+		"Error Field\t[total]\t%d\n" +
 		"Status Codes\t[code:count]\t"
 
 	return func(w io.Writer) (err error) {
@@ -71,6 +73,8 @@ func NewTextReporter(m *Metrics) Reporter {
 			m.BytesIn.Total, m.BytesIn.Mean,
 			m.BytesOut.Total, m.BytesOut.Mean,
 			m.Success*100,
+			m.HasData,
+			m.HasErrors,
 		); err != nil {
 			return err
 		}

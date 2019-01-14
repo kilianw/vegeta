@@ -1,4 +1,4 @@
-package main
+package vegeta
 
 import (
 	"errors"
@@ -6,11 +6,10 @@ import (
 	"io"
 	"os"
 	"strings"
-
-	vegeta "github.com/tsenart/vegeta/lib"
 )
 
-func file(name string, create bool) (*os.File, error) {
+// File create and open file
+func File(name string, create bool) (*os.File, error) {
 	switch name {
 	case "stdin":
 		return os.Stdin, nil
@@ -24,16 +23,17 @@ func file(name string, create bool) (*os.File, error) {
 	}
 }
 
-func decoder(files []string) (vegeta.Decoder, io.Closer, error) {
+// CreateDecoder create report decoder
+func CreateDecoder(files []string) (Decoder, io.Closer, error) {
 	closer := make(multiCloser, 0, len(files))
-	decs := make([]vegeta.Decoder, 0, len(files))
+	decs := make([]Decoder, 0, len(files))
 	for _, f := range files {
-		rc, err := file(f, false)
+		rc, err := File(f, false)
 		if err != nil {
 			return nil, closer, err
 		}
 
-		dec := vegeta.DecoderFor(rc)
+		dec := DecoderFor(rc)
 		if dec == nil {
 			return nil, closer, fmt.Errorf("encode: can't detect encoding of %q", f)
 		}
@@ -41,7 +41,7 @@ func decoder(files []string) (vegeta.Decoder, io.Closer, error) {
 		decs = append(decs, dec)
 		closer = append(closer, rc)
 	}
-	return vegeta.NewRoundRobinDecoder(decs...), closer, nil
+	return NewRoundRobinDecoder(decs...), closer, nil
 }
 
 type multiCloser []io.Closer

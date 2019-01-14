@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tsenart/vegeta/internal/resolver"
-	vegeta "github.com/tsenart/vegeta/lib"
+	"github.com/kilianw/vegeta/internal/resolver"
+	vegeta "github.com/kilianw/vegeta/lib"
 )
 
 func attackCmd() command {
@@ -110,7 +110,7 @@ func attack(opts *attackOpts) (err error) {
 		if filename == "" {
 			continue
 		}
-		f, err := file(filename, false)
+		f, err := vegeta.File(filename, false)
 		if err != nil {
 			return fmt.Errorf("error opening %s: %s", filename, err)
 		}
@@ -149,7 +149,7 @@ func attack(opts *attackOpts) (err error) {
 		tr = vegeta.NewStaticTargeter(targets...)
 	}
 
-	out, err := file(opts.outputf, true)
+	out, err := vegeta.File(opts.outputf, true)
 	if err != nil {
 		return fmt.Errorf("error opening %s: %s", opts.outputf, err)
 	}

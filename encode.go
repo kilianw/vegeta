@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"strings"
 
-	vegeta "github.com/tsenart/vegeta/lib"
+	vegeta "github.com/kilianw/vegeta/lib"
 )
 
 const (
@@ -70,13 +70,13 @@ func encodeCmd() command {
 }
 
 func encode(files []string, to, output string) error {
-	dec, mc, err := decoder(files)
+	dec, mc, err := vegeta.CreateDecoder(files)
 	defer mc.Close()
 	if err != nil {
 		return err
 	}
 
-	out, err := file(output, true)
+	out, err := vegeta.File(output, true)
 	if err != nil {
 		return err
 	}
