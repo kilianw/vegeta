@@ -2,7 +2,6 @@ package vegeta
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/graphql-go/graphql"
 	"strconv"
 	"time"
@@ -92,22 +91,27 @@ func (m *Metrics) Add(r *Result) {
 				m.HasData++
 			}
 			if gqlResult.Errors != nil {
-				fmt.Println(gqlResult.Errors)
 				m.HasErrors++
 				for _, err := range gqlResult.Errors {
 					if err.Message != "" {
-						m.errors[err.Message] = struct{}{}
-						m.Errors = append(m.Errors, err.Message)
+						if _, ok := m.errors[err.Message]; !ok {
+							m.errors[err.Message] = struct{}{}
+							m.Errors = append(m.Errors, err.Message)
+						}
 					}
 				}
 			}
 		} else {
-			m.errors["Unable to decode GQL"] = struct{}{}
-			m.Errors = append(m.Errors, "Unable to decode GQL")
+			if _, ok := m.errors["Unable to decode GQL"]; !ok {
+				m.errors["Unable to decode GQL"] = struct{}{}
+				m.Errors = append(m.Errors, "Unable to decode GQL")
+			}
 		}
 	} else {
-		m.errors["No Body Found"] = struct{}{}
-		m.Errors = append(m.Errors, "No Body Found")
+		if _, ok := m.errors["No Body Found"]; !ok {
+			m.errors["No Body Found"] = struct{}{}
+			m.Errors = append(m.Errors, "No Body Found")
+		}
 	}
 }
 
