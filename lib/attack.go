@@ -1,6 +1,7 @@
 package vegeta
 
 import (
+	"compress/gzip"
 	"crypto/tls"
 	"fmt"
 	"io"
@@ -310,9 +311,16 @@ func (a *Attacker) hit(tr Targeter, name string) *Result {
 	if err != nil {
 		return &res
 	}
+	var body io.Reader
+
+	switch r.Header.Get("Content-Encoding") {
+	case "gzip":
+		body, err = gzip.NewReader(r.Body)
+	default:
+		body = io.Reader(r.Body)
+	}
 	defer r.Body.Close()
 
-	body := io.Reader(r.Body)
 	if a.maxBody >= 0 {
 		body = io.LimitReader(r.Body, a.maxBody)
 	}
